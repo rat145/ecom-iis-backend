@@ -1,0 +1,16 @@
+import FileUploadField from '../../inputFields/FileUploadField'
+import CheckBoxField from '../../inputFields/CheckBoxField'
+import { getHelperText } from '../../../utils/customFunctions/getHelperText'
+import CommonRedirect from '../CommonRedirect'
+
+const FullWidthBanner5 = ({ values, setFieldValue, productData, categoryData, setSearch }) => {
+    return (
+        <>
+            <FileUploadField name="fullWidthImage" title='Image' showImage={values['fullWidthImage']} id="fullWidthImage" type="file" values={values} setFieldValue={setFieldValue} helpertext={getHelperText('1594x101px')} />
+            <CommonRedirect values={values} setFieldValue={setFieldValue} productData={productData} categoryData={categoryData} nameList={{ selectNameKey: 'fullWidthLinkType', multipleNameKey: 'fullWidthLink' }} setSearch={setSearch} />
+            <CheckBoxField name={`[content][full_width_banner][status]`} title="Status" />
+        </>
+    )
+}
+
+export default FullWidthBanner5

@@ -6,9 +6,11 @@ const nextConfig = {
 
     //  API_PROD_URL: "https://fastkart-admin-json.vercel.app/api/",
 
-    API_PROD_URL: "http://localhost:3000/api/",
+    // API_PROD_URL: "http://localhost:3000/api/",
 
     // API_PROD_URL: "https://laravel.pixelstrap.net/fastkart/api",
+
+    API_PROD_URL: "https://ecom-iis-admin.vercel.app/api",
   },
   redirects: async () => {
     return [

@@ -1,11 +1,13 @@
-"use client"
+"use client";
 import dynamic from "next/dynamic";
-const MainDashboard = dynamic(() => import("../../../../components/dashboard"), { ssr: false })
+import { withAdminAuth } from "@/utils/hoc/withAuth";
+const MainDashboard = dynamic(
+  () => import("../../../../components/dashboard"),
+  { ssr: false }
+);
 
 const Dashboard = () => {
-  return (
-    <MainDashboard />
-  )
+  return <MainDashboard />;
 };
 
-export default Dashboard;
+export default withAdminAuth(Dashboard);

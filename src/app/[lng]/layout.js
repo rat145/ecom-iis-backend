@@ -1,6 +1,8 @@
 import "../../../public/assets/scss/app.scss";
 import I18NextProvider from "@/helper/i18NextContext/I18NextProvider";
 import TanstackWrapper from "@/layout/TanstackWrapper";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { dir } from "i18next";
 
 export async function generateMetadata() {
   // fetch data
@@ -24,11 +26,13 @@ export async function generateMetadata() {
 export default async function RootLayout({ children, params }) {
   const { lng } = await params; // Await params to resolve the Promise
   return (
-    <html lang={lng}>
+    <html lang={lng} dir={dir(lng)}>
       <body suppressHydrationWarning={true}>
-        <I18NextProvider>
-          <TanstackWrapper>{children}</TanstackWrapper>
-        </I18NextProvider>
+        <AuthProvider>
+          <I18NextProvider>
+            <TanstackWrapper>{children}</TanstackWrapper>
+          </I18NextProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -6,7 +6,7 @@ import { dir } from "i18next";
 
 export async function generateMetadata() {
   // fetch data
-  const settingData = await fetch(`${process.env.API_PROD_URL}settings`)
+  const settingData = await fetch(`${process.env.API_PROD_URL}/settings`)
     .then((res) => res.json())
     .catch((err) => console.log("err", err));
   return {

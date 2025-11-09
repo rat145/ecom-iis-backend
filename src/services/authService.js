@@ -9,10 +9,11 @@ import {
   updatePassword,
   updateProfile,
   onAuthStateChanged,
-  sendEmailVerification
-} from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../config/firebase.config';
+  sendEmailVerification,
+} from "firebase/auth";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import Cookies from "js-cookie";
+import { auth, db } from "../config/firebase.config";
 
 /**
  * Register a new user
@@ -22,33 +23,37 @@ import { auth, db } from '../config/firebase.config';
  * @param {string} phone - User phone number
  * @returns {Promise<Object>} User data
  */
-export const registerUser = async (email, password, name, phone = '') => {
+export const registerUser = async (email, password, name, phone = "") => {
   try {
     // Create user in Firebase Auth
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     const user = userCredential.user;
 
     // Update user profile with name
     await updateProfile(user, {
-      displayName: name
+      displayName: name,
     });
 
     // Send email verification
     await sendEmailVerification(user);
 
     // Create user document in Firestore
-    await setDoc(doc(db, 'users', user.uid), {
+    await setDoc(doc(db, "users", user.uid), {
       uid: user.uid,
       email: email,
       name: name,
       phone: phone,
-      role: 'customer',
-      profile_image_url: '',
+      role: "customer",
+      profile_image_url: "",
       status: 1,
       points: 0,
       wallet_balance: 0,
       created_at: serverTimestamp(),
-      updated_at: serverTimestamp()
+      updated_at: serverTimestamp(),
     });
 
     return {
@@ -57,11 +62,11 @@ export const registerUser = async (email, password, name, phone = '') => {
         uid: user.uid,
         email: user.email,
         name: name,
-        role: 'customer'
-      }
+        role: "customer",
+      },
     };
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     throw error;
   }
 };
@@ -74,20 +79,32 @@ export const registerUser = async (email, password, name, phone = '') => {
  */
 export const loginUser = async (email, password) => {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     const user = userCredential.user;
 
     // Get user data from Firestore to check role
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+
     if (!userDoc.exists()) {
-      throw new Error('User data not found');
+      throw new Error("User data not found");
     }
 
     const userData = userDoc.data();
 
     // Get Firebase ID token
     const token = await user.getIdToken();
+
+    // Set cookie with proper attributes
+    Cookies.set("uat", token, {
+      expires: 7,
+      path: "/",
+      sameSite: "Lax",
+      secure: true,
+    });
 
     return {
       success: true,
@@ -96,11 +113,11 @@ export const loginUser = async (email, password) => {
         email: user.email,
         name: userData.name,
         role: userData.role,
-        token: token
-      }
+        token: token,
+      },
     };
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     throw error;
   }
 };
@@ -114,7 +131,7 @@ export const logoutUser = async () => {
     await signOut(auth);
     return { success: true };
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error("Logout error:", error);
     throw error;
   }
 };
@@ -129,10 +146,10 @@ export const sendPasswordReset = async (email) => {
     await sendPasswordResetEmail(auth, email);
     return {
       success: true,
-      message: 'Password reset email sent successfully'
+      message: "Password reset email sent successfully",
     };
   } catch (error) {
-    console.error('Password reset error:', error);
+    console.error("Password reset error:", error);
     throw error;
   }
 };
@@ -146,16 +163,16 @@ export const updateUserPassword = async (newPassword) => {
   try {
     const user = auth.currentUser;
     if (!user) {
-      throw new Error('No user is currently logged in');
+      throw new Error("No user is currently logged in");
     }
 
     await updatePassword(user, newPassword);
     return {
       success: true,
-      message: 'Password updated successfully'
+      message: "Password updated successfully",
     };
   } catch (error) {
-    console.error('Password update error:', error);
+    console.error("Password update error:", error);
     throw error;
   }
 };
@@ -171,7 +188,7 @@ export const getCurrentUser = async () => {
       return null;
     }
 
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const userDoc = await getDoc(doc(db, "users", user.uid));
     if (!userDoc.exists()) {
       return null;
     }
@@ -180,10 +197,10 @@ export const getCurrentUser = async () => {
     return {
       uid: user.uid,
       email: user.email,
-      ...userData
+      ...userData,
     };
   } catch (error) {
-    console.error('Get current user error:', error);
+    console.error("Get current user error:", error);
     return null;
   }
 };
@@ -196,12 +213,12 @@ export const getCurrentUser = async () => {
 export const onAuthStateChange = (callback) => {
   return onAuthStateChanged(auth, async (user) => {
     if (user) {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         callback({
           uid: user.uid,
           email: user.email,
-          ...userDoc.data()
+          ...userDoc.data(),
         });
       } else {
         callback(null);
@@ -221,14 +238,13 @@ export const isAdmin = async () => {
     const user = auth.currentUser;
     if (!user) return false;
 
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const userDoc = await getDoc(doc(db, "users", user.uid));
     if (!userDoc.exists()) return false;
 
     const userData = userDoc.data();
-    return userData.role === 'admin';
+    return userData.role === "admin";
   } catch (error) {
-    console.error('Check admin error:', error);
+    console.error("Check admin error:", error);
     return false;
   }
 };
-
